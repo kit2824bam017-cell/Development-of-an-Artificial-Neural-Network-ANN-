@@ -1,0 +1,36 @@
+{
+    "dataset": {
+        "n_samples": 1500,
+        "noise": 0.2,
+        "train_samples": 1049,
+        "val_samples": 226,
+        "test_samples": 225
+    },
+    "baseline_linear_model": {
+        "accuracy": 0.8844444444444445,
+        "precision": 0.8981481481481481,
+        "recall": 0.8660714285714286,
+        "f1_score": 0.8818181818181818,
+        "roc_auc": 0.956858407079646
+    },
+    "deep_ann_model": {
+        "parameters": 881,
+        "best_epoch": 22,
+        "best_val_loss": 0.08715737775891227,
+        "accuracy": 0.9555555555555556,
+        "precision": 0.9636363636363636,
+        "recall": 0.9464285714285714,
+        "f1_score": 0.954954954954955,
+        "roc_auc": 0.9906763590391908,
+        "confusion_matrix": [
+            [
+                109,
+                4
+            ],
+            [
+                6,
+                106
+            ]
+        ]
+    }
+}

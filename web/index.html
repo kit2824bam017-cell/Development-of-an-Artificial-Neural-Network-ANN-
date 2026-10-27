@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANN Binary Classification Studio | Scikit-Learn make_moons</title>
+  <meta name="description" content="Development and interactive visualization of an Artificial Neural Network (ANN) for binary classification on the scikit-learn make_moons dataset.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="glow-orb orb-3"></div>
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="6" cy="6" r="3"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="12" r="3"/>
+          <path d="M8.5 7.5L15.5 10.5"/>
+          <path d="M8.5 16.5L15.5 13.5"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="nav-title">NeuralMoons AI</h1>
+        <p class="nav-subtitle">Artificial Neural Network for Binary Classification (make_moons)</p>
+      </div>
+    </div>
+    <div class="nav-badges">
+      <span class="badge badge-accent">PyTorch 2.14</span>
+      <span class="badge badge-success">Scikit-Learn 1.9</span>
+      <span class="badge badge-outline">Accuracy 95.6%</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Executive KPI Bar -->
+    <section class="kpi-grid">
+      <div class="kpi-card" id="kpi-acc">
+        <div class="kpi-header">
+          <span class="kpi-label">ANN Test Accuracy</span>
+          <span class="kpi-tag tag-up">+7.12% vs Linear</span>
+        </div>
+        <div class="kpi-value text-gradient-cyan">95.56%</div>
+        <div class="kpi-footer">Baseline Linear: 88.44%</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-auc">
+        <div class="kpi-header">
+          <span class="kpi-label">ROC-AUC Score</span>
+          <span class="kpi-tag tag-gold">Near Optimal</span>
+        </div>
+        <div class="kpi-value text-gradient-indigo">0.9907</div>
+        <div class="kpi-footer">Separation quality across thresholds</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-f1">
+        <div class="kpi-header">
+          <span class="kpi-label">F1-Score</span>
+          <span class="kpi-tag tag-accent">Balanced</span>
+        </div>
+        <div class="kpi-value text-gradient-rose">0.9550</div>
+        <div class="kpi-footer">Precision: 96.4% | Recall: 94.6%</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-params">
+        <div class="kpi-header">
+          <span class="kpi-label">Trainable Parameters</span>
+          <span class="kpi-tag tag-info">Lightweight</span>
+        </div>
+        <div class="kpi-value text-gradient-emerald">881</div>
+        <div class="kpi-footer">3 Hidden Layers + BatchNorm + Dropout</div>
+      </div>
+    </section>
+
+    <!-- Main Interactive Studio -->
+    <section class="studio-grid">
+      <!-- 2D Canvas & Simulator -->
+      <div class="card interactive-panel">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Live 2D Feature Space Playground</h2>
+            <p class="card-desc">Click anywhere inside the feature plane to probe custom predictions</p>
+          </div>
+          <div class="controls-toolbar">
+            <button id="btn-regenerate" class="btn btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Reseed Data
+            </button>
+            <button id="btn-toggle-boundary" class="btn btn-primary">
+              <span id="boundary-btn-label">Show ANN Boundary</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="moonsCanvas" width="600" height="420"></canvas>
+          <div id="probe-tooltip" class="probe-tooltip hidden">
+            <div class="tooltip-header" id="probe-title">Probe Point</div>
+            <div class="tooltip-body">
+              <div>Coordinates: <span id="probe-coords" class="mono">(0.00, 0.00)</span></div>
+              <div>Predicted Class: <span id="probe-class" class="font-bold">Moon 0</span></div>
+              <div>Confidence: <span id="probe-conf" class="mono">94.2%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slider Controls -->
+        <div class="slider-row">
+          <div class="slider-group">
+            <label for="threshold-slider">
+              Decision Threshold $\tau$: <span id="threshold-val" class="mono">0.50</span>
+            </label>
+            <input type="range" id="threshold-slider" min="0.05" max="0.95" step="0.01" value="0.50">
+          </div>
+          <div class="slider-group">
+            <label for="noise-slider">
+              Dataset Noise $\sigma$: <span id="noise-val" class="mono">0.20</span>
+            </label>
+            <input type="range" id="noise-slider" min="0.05" max="0.40" step="0.05" value="0.20">
+          </div>
+          <div class="slider-group">
+            <label for="samples-slider">
+              Sample Count: <span id="samples-val" class="mono">300</span>
+            </label>
+            <input type="range" id="samples-slider" min="100" max="600" step="50" value="300">
+          </div>
+        </div>
+
+        <div class="legend-row">
+          <div class="legend-item"><span class="dot dot-moon0"></span> Moon 0 (Class 0, Upper)</div>
+          <div class="legend-item"><span class="dot dot-moon1"></span> Moon 1 (Class 1, Lower)</div>
+          <div class="legend-item"><span class="line-swatch line-boundary"></span> Non-linear ANN Boundary</div>
+          <div class="legend-item"><span class="line-swatch line-linear"></span> Linear Baseline Boundary</div>
+        </div>
+      </div>
+
+      <!-- Architecture & Inspect Panel -->
+      <div class="card architecture-panel">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Network Architecture</h2>
+            <p class="card-desc">Deep Multilayer Perceptron with Batch Normalization</p>
+          </div>
+        </div>
+
+        <div class="nn-flow">
+          <!-- Layer 1 -->
+          <div class="layer-item">
+            <div class="layer-badge">Input Layer</div>
+            <div class="layer-box">
+              <span class="layer-name">Features [X₁, X₂]</span>
+              <span class="layer-meta">2 Dimensions</span>
+            </div>
+          </div>
+
+          <div class="flow-arrow">↓ Dense (2 → 32)</div>
+
+          <!-- Layer 2 -->
+          <div class="layer-item">
+            <div class="layer-badge">Hidden Layer 1</div>
+            <div class="layer-box active">
+              <span class="layer-name">FC (32 Neurons)</span>
+              <span class="layer-meta">BatchNorm1d + LeakyReLU(0.1) + Dropout(0.1)</span>
+            </div>
+          </div>
+
+          <div class="flow-arrow">↓ Dense (32 → 16)</div>
+
+          <!-- Layer 3 -->
+          <div class="layer-item">
+            <div class="layer-badge">Hidden Layer 2</div>
+            <div class="layer-box">
+              <span class="layer-name">FC (16 Neurons)</span>
+              <span class="layer-meta">BatchNorm1d + LeakyReLU(0.1) + Dropout(0.1)</span>
+            </div>
+          </div>
+
+          <div class="flow-arrow">↓ Dense (16 → 8)</div>
+
+          <!-- Layer 4 -->
+          <div class="layer-item">
+            <div class="layer-badge">Hidden Layer 3</div>
+            <div class="layer-box">
+              <span class="layer-name">FC (8 Neurons)</span>
+              <span class="layer-meta">LeakyReLU(0.1) Representation</span>
+            </div>
+          </div>
+
+          <div class="flow-arrow">↓ Dense (8 → 1)</div>
+
+          <!-- Output -->
+          <div class="layer-item">
+            <div class="layer-badge">Output Layer</div>
+            <div class="layer-box output-box">
+              <span class="layer-name">Single Logit → Sigmoid σ(z)</span>
+              <span class="layer-meta">Binary Class Probability $P(Y=1|X)$</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparative Summary Box -->
+        <div class="comparison-box">
+          <h3 class="comparison-title">Why Linear Models Fail on make_moons</h3>
+          <p class="comparison-text">
+            Because the crescent moons interlock in 2D space, no single straight hyperplane ($w_1 x_1 + w_2 x_2 + b = 0$) can bifurcate both half-circles without severing the crescent tails. The ANN's non-linear activations ($\text{LeakyReLU}$) fold the coordinate space, enabling it to carve a sinuous S-curve boundary.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Artifacts Gallery -->
+    <section class="gallery-section">
+      <div class="section-title-wrap">
+        <h2 class="section-title">Model Diagnostics & Training Artifacts</h2>
+        <p class="section-subtitle">Generated figures from the automated PyTorch execution pipeline</p>
+      </div>
+
+      <div class="artifacts-grid">
+        <div class="artifact-card">
+          <div class="artifact-media">
+            <img src="../outputs/03_linear_vs_ann_boundary.png" alt="Decision Boundary Comparison" loading="lazy">
+          </div>
+          <div class="artifact-content">
+            <h3 class="artifact-title">Decision Boundary: Linear vs. Deep ANN</h3>
+            <p class="artifact-desc">Side-by-side contrast proving how the 3-layer neural network bends around the non-linear crescent geometry.</p>
+          </div>
+        </div>
+
+        <div class="artifact-card">
+          <div class="artifact-media">
+            <img src="../outputs/02_learning_curves.png" alt="Learning Curves" loading="lazy">
+          </div>
+          <div class="artifact-content">
+            <h3 class="artifact-title">Training & Validation Learning Curves</h3>
+            <p class="artifact-desc">Convergence of Binary Cross-Entropy loss and accuracy across epochs with early stopping at epoch 42.</p>
+          </div>
+        </div>
+
+        <div class="artifact-card">
+          <div class="artifact-media">
+            <img src="../outputs/04_diagnostics_roc_cm.png" alt="ROC & Confusion Matrix" loading="lazy">
+          </div>
+          <div class="artifact-content">
+            <h3 class="artifact-title">ROC Curve & Confusion Matrix</h3>
+            <p class="artifact-desc">Area Under the Curve (AUC = 0.9907) and balanced true positive/negative distribution on test data.</p>
+          </div>
+        </div>
+
+        <div class="artifact-card">
+          <div class="artifact-media">
+            <img src="../outputs/01_dataset_distribution.png" alt="make_moons Dataset Distribution" loading="lazy">
+          </div>
+          <div class="artifact-content">
+            <h3 class="artifact-title">make_moons Distribution ($N=1500$)</h3>
+            <p class="artifact-desc">Original synthesized 2D data showing interpenetrating clusters under 20% Gaussian noise.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mathematical Foundations & Architecture Table -->
+    <section class="math-section">
+      <div class="card">
+        <h2 class="card-title">Mathematical Formulation</h2>
+        <div class="math-grid">
+          <div class="math-item">
+            <div class="math-header">Leaky ReLU Activation</div>
+            <div class="math-code mono">f(z) = max(α·z, z), α = 0.1</div>
+            <p class="math-desc">Prevents the "Dying ReLU" problem by providing a non-zero gradient for negative pre-activations.</p>
+          </div>
+          <div class="math-item">
+            <div class="math-header">BCE With Logits Loss</div>
+            <div class="math-code mono">L = max(z, 0) - z·y + log(1 + e^-|z|)</div>
+            <p class="math-desc">Applies the log-sum-exp trick for numerical stability, eliminating precision overflow during backprop.</p>
+          </div>
+          <div class="math-item">
+            <div class="math-header">Batch Normalization</div>
+            <div class="math-code mono">ŷ = γ·((x - μ) / √(σ² + ε)) + β</div>
+            <p class="math-desc">Normalizes mini-batch activations to stabilize covariate shift and accelerate convergence speed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>NeuralMoons AI &bull; Built with PyTorch, Scikit-Learn, and Vanilla JS &bull; Antigravity Agentic Studio</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
